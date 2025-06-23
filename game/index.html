@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aerial Defense Commander</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --panel-dark: #1a1a1a;
+            --border-military: #2a3a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaaaaa;
+            --weapon-blue: #3a7ca5;
+            --weapon-green: #4a9c6d;
+            --target-red: #cc3333;
+            --target-orange: #e68a00;
+            --highlight: #5cb85c;
+            --danger: #d9534f;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .header {
+            background-color: var(--panel-dark);
+            padding: 10px;
+            border-bottom: 2px solid var(--border-military);
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            color: var(--highlight);
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        .header h2 {
+            margin: 5px 0 0;
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .game-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        .weapons-panel, .targets-panel {
+            width: 200px;
+            padding: 15px;
+            background-color: var(--panel-dark);
+            border: 1px solid var(--border-military);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .battlefield {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0a0a0a 0%, #1a2a1a 100%);
+            border-left: 1px solid var(--border-military);
+            border-right: 1px solid var(--border-military);
+        }
+
+        .controls-panel {
+            background-color: var(--panel-dark);
+            padding: 10px;
+            border-top: 2px solid var(--border-military);
+            text-align: center;
+        }
+
+        .weapon, .target {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+        .weapon:hover, .target:hover {
+            transform: translateY(-2px);
+            border-color: var(--highlight);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .weapon {
+            background-color: rgba(58, 124, 165, 0.2);
+            border: 1px solid var(--weapon-blue);
+        }
+
+        .target {
+            background-color: rgba(204, 51, 51, 0.15);
+            border: 1px solid var(--target-red);
+        }
+
+        .weapon h3, .target h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .weapon p, .target p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .selected {
+            border-color: var(--highlight) !important;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            transform: translateY(-4px);
+        }
+
+        button {
+            background-color: var(--panel-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border-military);
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background-color: var(--highlight);
+            color: var(--panel-dark);
+            border-color: var(--highlight);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        button.danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .target-incoming {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: left 0.05s linear;
+        }
+
+        .target-uav {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e68a00"><path d="M12 2L1 12h4v8h6v-6h2v6h6v-8h4L12 2z"/></svg>');
+        }
+
+        .target-missile {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cc3333"><path d="M13 3v11h8v-2h-6V5.08c3.39.49 6 3.39 6 6.92 0 3.87-3.13 7-7 7-1.65 0-3.17-.58-4.37-1.53l1.41-1.41C13.55 17.63 14.72 18 16 18c2.76 0 5-2.24 5-5s-2.24-5-5-5h-1V3h-2z"/></svg>');
+        }
+
+        .target-aircraft {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23cc3333"><path d="M22 16.21v-5.23c0-.81-.48-1.53-1.22-1.85l-4.16-1.52-.34-.12-.34-.12-1.56-.57-1.74-.64L12 5.02 10.86 4.5l-1.74.65-1.56.57-.34.12-.34.13-4.16 1.52C1.48 9.45 1 10.17 1 10.98v5.23c0 .81.48 1.54 1.22 1.85l4.16 1.52.34.12.34.12 1.56.57 1.74.64 1.14.52 1.14-.52 1.74-.64 1.56-.57.34-.12.34-.12 4.16-1.52c.74-.31 1.22-1.04 1.22-1.85zM11.62 5l4.16 1.52L20 10.98l-4.22 1.5L11.62 14V5zM6.38 5v8.98l-4.38-1.6-1.6-.58v-.82L6.38 5z"/></svg>');
+        }
+
+        .assignment-line {
+            position: absolute;
+            background-color: rgba(92, 184, 92, 0.5);
+            height: 2px;
+            transform-origin: 0 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .results-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(26, 26, 26, 0.9);
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid var(--highlight);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            min-width: 400px;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .results-panel h3 {
+            margin: 0 0 10px;
+            color: var(--highlight);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .success {
+            color: var(--highlight);
+        }
+
+        .failure {
+            color: var(--danger);
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(26, 26, 26, 0.9);
+            border: 1px solid var(--border-military);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 100;
+            max-width: 200px;
+            display: none;
+        }
+
+        .efficiency-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.8rem;
+        }
+
+        .efficiency-matrix th, .efficiency-matrix td {
+            border: 1px solid var(--border-military);
+            padding: 5px;
+            text-align: center;
+        }
+
+        .efficiency-matrix th {
+            background-color: rgba(26, 26, 26, 0.7);
+        }
+
+        .matrix-label {
+            font-weight: bold;
+            color: var(--highlight);
+        }
+
+        .playmode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .playmode-btn {
+            padding: 5px 15px;
+            margin: 0 5px;
+            border-radius: 4px;
+            background-color: transparent;
+            border: 1px solid var(--border-military);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .playmode-btn.active {
+            background-color: var(--highlight);
+            color: var(--panel-dark);
+            border-color: var(--highlight);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✯ AERIAL DEFENSE COMMANDER ✯</h1>
+        <h2>Assign weapons to incoming threats</h2>
+    </div>
+
+    <div class="game-container">
+        <div class="weapons-panel">
+            <h3>WEAPON SYSTEMS</h3>
+            <div class="weapon" data-weapon="missile">
+                <h3>Missile Launcher</h3>
+                <p>AA-12X Interceptor</p>
+            </div>
+            <div class="weapon" data-weapon="laser">
+                <h3>Laser Defense</h3>
+                <p>Photon-7 Array</p>
+            </div>
+            <div class="weapon" data-weapon="emp">
+                <h3>EMP Pulse</h3>
+                <p>Electro-Jammer MK3</p>
+            </div>
+
+            <h3 style="margin-top: 20px;">EFFICIENCY MATRIX</h3>
+            <table class="efficiency-matrix">
+                <tr>
+                    <th>Weapon \ Target</th>
+                    <th>UAV</th>
+                    <th>Missile</th>
+                    <th>Aircraft</th>
+                </tr>
+                <tr>
+                    <td class="matrix-label">Missile</td>
+                    <td>60%</td>
+                    <td>30%</td>
+                    <td>80%</td>
+                </tr>
+                <tr>
+                    <td class="matrix-label">Laser</td>
+                    <td>90%</td>
+                    <td>70%</td>
+                    <td>40%</td>
+                </tr>
+                <tr>
+                    <td class="matrix-label">EMP</td>
+                    <td>50%</td>
+                    <td>20%</td>
+                    <td>50%</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="battlefield" id="battlefield">
+            <!-- Targets will be dynamically added here -->
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+
+        <div class="targets-panel">
+            <h3>INCOMING THREATS</h3>
+            <div class="playmode-selector">
+                <div class="playmode-btn active" data-mode="manual">MANUAL</div>
+                <div class="playmode-btn" data-mode="simulation">SIMULATION</div>
+            </div>
+            <div class="target-groups">
+                <!-- Will be populated dynamically -->
+            </div>
+            <div id="simulation-description" style="margin-top: 15px; display: none;">
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                    In simulation mode, the system uses an optimization algorithm to maximize overall defense effectiveness.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-panel">
+        <button id="new-round-btn">NEW ROUND</button>
+        <button id="assign-btn" disabled>ASSIGN WEAPONS</button>
+        <button id="evaluate-btn" disabled>EVALUATE</button>
+        <button id="reset-btn" class="danger">RESET GAME</button>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            weapons: [
+                { id: 'missile', name: 'Missile Launcher' },
+                { id: 'laser', name: 'Laser Defense' },
+                { id: 'emp', name: 'EMP Pulse' }
+            ],
+            targets: [
+                { id: 'uav', name: 'UAV', class: 'target-uav', color: 'orange' },
+                { id: 'missile', name: 'Missile', class: 'target-missile', color: 'red' },
+                { id: 'aircraft', name: 'Combat Aircraft', class: 'target-aircraft', color: 'red' }
+            ],
+            efficiencyMatrix: {
+                missile: { uav: 0.6, missile: 0.3, aircraft: 0.8 },
+                laser: { uav: 0.9, missile: 0.7, aircraft: 0.4 },
+                emp: { uav: 0.5, missile: 0.2, aircraft: 0.5 }
+            },
+            currentSelectedWeapon: null,
+            currentSelectedTarget: null,
+            currentPlayMode: 'manual',
+            currentRound: 1,
+            assignments: {},
+            targetInstances: [],
+            evaluationResults: []
+        };
+
+        // DOM Elements
+        const battlefield = document.getElementById('battlefield');
+        const assignBtn = document.getElementById('assign-btn');
+        const evaluateBtn = document.getElementById('evaluate-btn');
+        const newRoundBtn = document.getElementById('new-round-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const tooltip = document.getElementById('tooltip');
+        const simulationDescription = document.getElementById('simulation-description');
+        const playmodeBtns = document.querySelectorAll('.playmode-btn');
+        const targetGroups = document.querySelector('.target-groups');
+
+        // Initialize game
+        function initGame() {
+            // Set up event listeners
+            document.querySelectorAll('.weapon').forEach(weapon => {
+                weapon.addEventListener('click', selectWeapon);
+            });
+
+            assignBtn.addEventListener('click', assignWeapon);
+            evaluateBtn.addEventListener('click', evaluateAssignments);
+            newRoundBtn.addEventListener('click', startNewRound);
+            resetBtn.addEventListener('click', resetGame);
+
+            playmodeBtns.forEach(btn => {
+                btn.addEventListener('click', changePlayMode);
+            });
+
+            // Start first round
+            startNewRound();
+        }
+
+        // Change play mode between manual and simulation
+        function changePlayMode(e) {
+            const mode = e.currentTarget.dataset.mode;
+            gameState.currentPlayMode = mode;
+            
+            playmodeBtns.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.currentTarget.classList.add('active');
+
+            if (mode === 'simulation') {
+                simulationDescription.style.display = 'block';
+            } else {
+                simulationDescription.style.display = 'none';
+            }
+
+            updateTargetsPanel();
+        }
+
+        // Start a new round
+        function startNewRound() {
+            // Clear previous state
+            battlefield.innerHTML = '<div class="tooltip" id="tooltip"></div>';
+            tooltip.style.display = 'none';
+            gameState.assignments = {};
+            gameState.evaluationResults = [];
+            gameState.targetInstances = [];
+            assignBtn.disabled = true;
+            evaluateBtn.disabled = true;
+
+            // Generate random targets for this round
+            const numTargets = 3 + Math.floor(Math.random() * 3); // 3-5 targets
+            const targetTypes = shuffleArray([...gameState.targets]);
+            
+            for (let i = 0; i < numTargets; i++) {
+                const targetType = targetTypes[i % targetTypes.length];
+                gameState.targetInstances.push({
+                    id: `target-${i}`,
+                    type: targetType.id,
+                    name: targetType.name,
+                    class: targetType.class,
+                    color: targetType.color,
+                    position: {
+                        startX: battlefield.offsetWidth,
+                        startY: 50 + Math.random() * (battlefield.offsetHeight - 100),
+                        x: battlefield.offsetWidth,
+                        y: 50 + Math.random() * (battlefield.offsetHeight - 100)
+                    },
+                    speed: 2 + Math.random() * 3,
+                    alive: true
+                });
+            }
+
+            // Update targets panel
+            updateTargetsPanel();
+
+            // In simulation mode, assign weapons automatically
+            if (gameState.currentPlayMode === 'simulation') {
+                autoAssignWeapons();
+            } else {
+                // In manual mode, enable weapon selection
+                enableWeaponSelection();
+            }
+
+            // Start animation
+            animateTargets();
+
+            gameState.currentRound++;
+        }
+
+        // Shuffle array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Update the targets panel with current targets
+        function updateTargetsPanel() {
+            targetGroups.innerHTML = '';
+            
+            gameState.targetInstances.forEach(target => {
+                const targetEl = document.createElement('div');
+                targetEl.className = 'target';
+                targetEl.dataset.targetId = target.id;
+                targetEl.innerHTML = `
+                    <h3>${target.name}</h3>
+                    <p>Speed: ${target.speed.toFixed(1)} km/s</p>
+                    <p>Status: ${target.alive ? 'Active' : 'Destroyed'}</p>
+                    ${gameState.assignments[target.id] ? 
+                        `<p>Assigned: ${gameState.weapons.find(w => w.id === gameState.assignments[target.id]).name}</p>` : 
+                        '<p>Unassigned</p>'}
+                `;
+                
+                // Add click handler for manual mode
+                if (gameState.currentPlayMode === 'manual') {
+                    targetEl.addEventListener('click', () => selectTarget(target.id));
+                }
+                
+                // Highlight if selected
+                if (gameState.currentSelectedTarget === target.id) {
+                    targetEl.classList.add('selected');
+                }
+                
+                targetGroups.appendChild(targetEl);
+            });
+        }
+
+        // Enable weapon selection
+        function enableWeaponSelection() {
+            document.querySelectorAll('.weapon').forEach(w => {
+                w.style.cursor = 'pointer';
+                w.addEventListener('click', selectWeapon);
+            });
+        }
+
+        // Disable weapon selection
+        function disableWeaponSelection() {
+            document.querySelectorAll('.weapon').forEach(w => {
+                w.style.cursor = 'default';
+                w.removeEventListener('click', selectWeapon);
+            });
+        }
+
+        // Select a weapon
+        function selectWeapon(e) {
+            const weaponEl = e.currentTarget;
+            const weaponId = weaponEl.dataset.weapon;
+            
+            // Clear previous selection
+            document.querySelectorAll('.weapon').forEach(w => {
+                w.classList.remove('selected');
+            });
+            
+            // Select new weapon
+            weaponEl.classList.add('selected');
+            gameState.currentSelectedWeapon = weaponId;
+            
+            // If in manual mode, enable target selection
+            if (gameState.currentPlayMode === 'manual') {
+                assignBtn.disabled = false;
+            }
+        }
+
+        // Select a target (manual mode only)
+        function selectTarget(targetId) {
+            // Clear previous selection
+            document.querySelectorAll('.target').forEach(t => {
+                t.classList.remove('selected');
+            });
+            
+            // Select new target
+            gameState.currentSelectedTarget = targetId;
+            
+            // Highlight the selected target
+            document.querySelector(`.target[data-target-id="${targetId}"]`).classList.add('selected');
+            
+            // Enable assign button if weapon is selected
+            if (gameState.currentSelectedWeapon) {
+                assignBtn.disabled = false;
+            }
+        }
+
+        // Assign weapon to target
+        function assignWeapon() {
+            if (!gameState.currentSelectedWeapon || !gameState.currentSelectedTarget) return;
+
+            const targetId = gameState.currentSelectedTarget;
+            const weaponId = gameState.currentSelectedWeapon;
+            
+            // Check if weapon is already assigned
+            const assignedToOtherTarget = Object.entries(gameState.assignments).some(
+                ([tId, wId]) => wId === weaponId && tId !== targetId
+            );
+            
+            if (assignedToOtherTarget) {
+                showTooltip('This weapon is already assigned to another target!', 'warning');
+                return;
+            }
+            
+            // Assign weapon to target
+            gameState.assignments[targetId] = weaponId;
+            
+            // Reset selection
+            gameState.currentSelectedWeapon = null;
+            gameState.currentSelectedTarget = null;
+            document.querySelectorAll('.weapon, .target').forEach(el => {
+                el.classList.remove('selected');
+            });
+            assignBtn.disabled = true;
+            
+            // Check if all targets are assigned
+            const allAssigned = gameState.targetInstances.every(
+                target => gameState.assignments[target.id] || !target.alive
+            );
+            
+            // Update UI
+            updateTargetsPanel();
+            
+            // Draw assignment line
+            drawAssignmentLine(targetId, weaponId);
+            
+            if (allAssigned) {
+                evaluateBtn.disabled = false;
+            }
+        }
+
+        // Auto-assign weapons using a simple optimization algorithm
+        function autoAssignWeapons() {
+            // Simple greedy algorithm to maximize expected kills
+            const targets = gameState.targetInstances.filter(t => t.alive);
+            const weapons = [...gameState.weapons];
+            gameState.assignments = {};
+            
+            // Create a list of all possible assignments with their effectiveness
+            const assignments = [];
+            targets.forEach(target => {
+                weapons.forEach(weapon => {
+                    assignments.push({
+                        target: target.id,
+                        weapon: weapon.id,
+                        effectiveness: gameState.efficiencyMatrix[weapon.id][target.type]
+                    });
+                });
+            });
+            
+            // Sort assignments by effectiveness (descending)
+            assignments.sort((a, b) => b.effectiveness - a.effectiveness);
+            
+            // Assign weapons to targets, ensuring each weapon is assigned at most once
+            const assignedWeapons = new Set();
+            const assignedTargets = new Set();
+            
+            for (const assignment of assignments) {
+                if (!assignedWeapons.has(assignment.weapon) && !assignedTargets.has(assignment.target)) {
+                    gameState.assignments[assignment.target] = assignment.weapon;
+                    assignedWeapons.add(assignment.weapon);
+                    assignedTargets.add(assignment.target);
+                    drawAssignmentLine(assignment.target, assignment.weapon);
+                    
+                    // Stop when all weapons or targets are assigned
+                    if (assignedWeapons.size === weapons.length || assignedTargets.size === targets.length) {
+                        break;
+                    }
+                }
+            }
+            
+            // Update UI and enable evaluation
+            updateTargetsPanel();
+            evaluateBtn.disabled = false;
+        }
+
+        // Draw a line between weapon and target
+        function drawAssignmentLine(targetId, weaponId) {
+            // Remove any existing line for this target
+            document.querySelectorAll(`.assignment-line[data-target="${targetId}"]`).forEach(el => el.remove());
+            
+            const target = gameState.targetInstances.find(t => t.id === targetId);
+            if (!target) return;
+            
+            const weaponEl = document.querySelector(`.weapon[data-weapon="${weaponId}"]`);
+            if (!weaponEl) return;
+            
+            // Calculate positions
+            const weaponRect = weaponEl.getBoundingClientRect();
+            const weaponX = weaponRect.right;
+            const weaponY = weaponRect.top + weaponRect.height / 2;
+            
+            const battlefieldRect = battlefield.getBoundingClientRect();
+            const targetX = target.position.x - battlefieldRect.left;
+            const targetY = target.position.y + 20 - battlefieldRect.top; // Add 20px to adjust for the target's position
+            
+            // Create line
+            const line = document.createElement('div');
+            line.className = 'assignment-line';
+            line.dataset.target = targetId;
+            line.dataset.weapon = weaponId;
+            
+            // Calculate line length and angle
+            const length = Math.sqrt(Math.pow(targetX - weaponX, 2) + Math.pow(targetY - weaponY, 2));
+            const angle = Math.atan2(targetY - weaponY, targetX - weaponX) * 180 / Math.PI;
+            
+            // Set line properties
+            line.style.width = `${length}px`;
+            line.style.left = `${weaponX - battlefieldRect.left}px`;
+            line.style.top = `${weaponY - battlefieldRect.top}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            battlefield.appendChild(line);
+        }
+
+        // Evaluate all assignments
+        function evaluateAssignments() {
+            gameState.evaluationResults = [];
+            
+            gameState.targetInstances.forEach(target => {
+                if (!target.alive || !gameState.assignments[target.id]) {
+                    gameState.evaluationResults.push({
+                        targetId: target.id,
+                        success: false,
+                        message: `${target.name} was not assigned a weapon`
+                    });
+                    return;
+                }
+                
+                const weaponId = gameState.assignments[target.id];
+                const successRate = gameState.efficiencyMatrix[weaponId][target.type];
+                const success = Math.random() < successRate;
+                
+                // Update target state
+                target.alive = !success;
+                
+                gameState.evaluationResults.push({
+                    targetId: target.id,
+                    weaponId: weaponId,
+                    targetType: target.type,
+                    success: success,
+                    message: `${gameState.weapons.find(w => w.id === weaponId).name} vs ${target.name}: ${success ? 'DESTROYED' : 'MISSED'} (${Math.round(successRate * 100)}% chance)`
+                });
+            });
+
+            showResults();
+            disableWeaponSelection();
+        }
+
+        // Show evaluation results
+        function showResults() {
+            // Clear previous results
+            document.querySelectorAll('.results-panel').forEach(el => el.remove());
+            
+            const resultsPanel = document.createElement('div');
+            resultsPanel.className = 'results-panel';
+            
+            const title = document.createElement('h3');
+            title.textContent = `ROUND ${gameState.currentRound - 1} RESULTS`;
+            resultsPanel.appendChild(title);
+            
+            gameState.evaluationResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = `result-item ${result.success ? 'success' : 'failure'}`;
+                resultItem.innerHTML = `
+                    <span>${result.message}</span>
+                    <span>${result.success ? '✅' : '❌'}</span>
+                `;
+                resultsPanel.appendChild(resultItem);
+            });
+            
+            // Calculate success rate
+            const successfulAssignments = gameState.evaluationResults.filter(r => r.success).length;
+            const totalAssignments = gameState.evaluationResults.length;
+            const successRate = totalAssignments > 0 ? (successfulAssignments / totalAssignments) * 100 : 0;
+            
+            const summary = document.createElement('div');
+            summary.className = 'result-item';
+            summary.innerHTML = `<strong>TOTAL EFFECTIVENESS:</strong> <span class="${successRate >= 50 ? 'success' : 'danger'}">${Math.round(successRate)}% (${successfulAssignments}/${totalAssignments})</span>`;
+            resultsPanel.appendChild(summary);
+            
+            battlefield.appendChild(resultsPanel);
+            
+            // Stop target movement animation
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        // Animate incoming targets
+        let animationFrameId;
+        function animateTargets() {
+            // Clear any previous animation
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            
+            // Remove all target elements
+            document.querySelectorAll('.target-incoming').forEach(el => el.remove());
+            
+            // Update target positions
+            gameState.targetInstances.forEach(target => {
+                if (!target.position) return;
+                
+                // Move target left
+                target.position.x -= target.speed;
+                
+                // Create or update target element
+                let targetEl = document.querySelector(`.target-incoming[data-target="${target.id}"]`);
+                if (!targetEl) {
+                    targetEl = document.createElement('div');
+                    targetEl.className = `target-incoming ${target.class}`;
+                    targetEl.dataset.target = target.id;
+                    battlefield.appendChild(targetEl);
+                    
+                    // Add hover effect
+                    targetEl.addEventListener('mouseenter', (e) => {
+                        if (gameState.currentPlayMode !== 'manual') return;
+                        
+                        const rect = targetEl.getBoundingClientRect();
+                        tooltip.innerHTML = `
+                            <strong>${target.name}</strong><br>
+                            Type: ${target.type.toUpperCase()}<br>
+                            Speed: ${target.speed.toFixed(1)} km/s<br>
+                            ${gameState.assignments[target.id] ? 
+                                `Assigned: ${gameState.weapons.find(w => w.id === gameState.assignments[target.id]).name}` : 
+                                'Unassigned'}
+                        `;
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = `${rect.left}px`;
+                        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+                    });
+                    
+                    targetEl.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                    });
+                }
+                
+                // Update position
+                targetEl.style.left = `${target.position.x}px`;
+                targetEl.style.top = `${target.position.y}px`;
+                
+                // If target reaches left edge, mark as escaped
+                if (target.position.x < -50) {
+                    target.alive = false;
+                    if (!gameState.evaluationResults.some(r => r.targetId === target.id)) {
+                        gameState.evaluationResults.push({
+                            targetId: target.id,
+                            success: false,
+                            message: `${target.name} escaped the battlefield`
+                        });
+                    }
+                }
+            });
+            
+            // Stop animation if all targets are dead or escaped
+            const allTargetsResolved = gameState.targetInstances.every(
+                target => !target.alive || target.position.x < -50
+            );
+            
+            if (!allTargetsResolved) {
+                animationFrameId = requestAnimationFrame(animateTargets);
+            } else if (!gameState.evaluationResults.length) {
+                // If no evaluation was performed but targets are resolved (escaped)
+                showResults();
+            }
+        }
+
+        // Show tooltip message
+        function showTooltip(message, type = 'info') {
+            const existingTooltips = document.querySelectorAll('.floating-tooltip');
+            existingTooltips.forEach(t => t.remove());
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = `floating-tooltip ${type}`;
+            tooltip.textContent = message;
+            
+            document.body.appendChild(tooltip);
+            
+            // Position near the assign button
+            const btnRect = assignBtn.getBoundingClientRect();
+            tooltip.style.left = `${btnRect.left + window.scrollX}px`;
+            tooltip.style.top = `${btnRect.top + window.scrollY - tooltip.offsetHeight - 10}px`;
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                tooltip.remove();
+            }, 3000);
+        }
+
+        // Reset entire game
+        function resetGame() {
+            gameState.currentRound = 1;
+            gameState.assignments = {};
+            gameState.evaluationResults = [];
+            gameState.targetInstances = [];
+            gameState.currentSelectedWeapon = null;
+            gameState.currentSelectedTarget = null;
+            
+            // Clear battlefield
+            battlefield.innerHTML = '<div class="tooltip" id="tooltip"></div>';
+            tooltip.style.display = 'none';
+            
+            // Reset buttons
+            assignBtn.disabled = true;
+            evaluateBtn.disabled = true;
+            
+            // Enable weapon selection
+            enableWeaponSelection();
+            
+            // Start new round
+            startNewRound();
+        }
+
+        // Initialize the game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
