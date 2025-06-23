@@ -3,25 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Target Acquired: A Discrete Math Showdown</title>
+  <title>Target Acquired: A Discrete Math Showdown</title> 
   <link rel="stylesheet" href="styles.css"> <!-- Optional: Add your CSS here -->
 </head>
 <body>
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-    nav a {
-      margin: 0 8px;
-      text-decoration: none;
-      font-weight: bold;
-      color: #333;
-    }
-    nav a:hover {
-      color: #007acc;
-    }
-  </style>
-
+  <nav>
+    <ul class="nav-bar">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#manual">Manual Mode</a></li>
+      <li><a href="#model">Math Model</a></li>
+      <li><a href="#insights">Insights</a></li>
+      <li><a href="#showdown">Showdown</a></li>
+      <li><a href="#simulation">Simulation</a></li>
+      <li><a href="#credits">Credits</a></li>
+    </ul>
+  </nav>
 
   <h1>🎯 Target Acquired: A Discrete Math Showdown Between Humans and Algorithms</h1>
   <p>
@@ -32,7 +28,7 @@
   </p>
   <hr>
 
-  <h2>🚀 Problem Setup</h2>
+  <h2 id="problem">🚀 Problem Setup</h2>
   <p>We consider three types of <strong>weapons</strong> and <strong>aerial targets</strong>:</p>
   <table border="1" cellspacing="0" cellpadding="5">
     <tr>
@@ -70,7 +66,7 @@
 
   <hr>
 
-  <h2>🎮 Manual Mode: Human Intuition</h2>
+  <h2 id="manual">🎮 Manual Mode: Human Intuition</h2>
   <p>You play the game by selecting which weapon to assign to each threat.</p>
   <p><strong>🔍 Example:</strong></p>
   <ul>
@@ -85,7 +81,7 @@
 
   <hr>
 
-  <h2>🤖 Mathematical Mode: Optimization Strategy</h2>
+  <h2 id="model">🤖 Mathematical Mode: Optimization Strategy</h2>
   <p>We define the problem using discrete math:</p>
   <ul>
     <li>Let <code>x_ij = 1</code> if weapon <code>i</code> is assigned to target <code>j</code>, otherwise 0</li>
@@ -106,7 +102,7 @@
 
   <hr>
 
-  <h2>🧠 Discrete Math Insights</h2>
+  <h2 id="insights">🧠 Discrete Math Insights</h2>
   <table border="1" cellspacing="0" cellpadding="5">
     <tr>
       <th>Concept</th>
@@ -132,7 +128,7 @@
 
   <hr>
 
-  <h2>🆚 Human vs. Model: The Showdown</h2>
+  <h2 id="showdown">🆚 Human vs. Model: The Showdown</h2>
   <p>We tested both approaches under identical scenarios:</p>
   <table border="1" cellspacing="0" cellpadding="5">
     <tr>
@@ -174,13 +170,12 @@
 
   <hr>
 
-  <h2>🔗 Try the Simulation (coming soon!)</h2>
-  <iframe src="./game/index.html" width="100%" height="600px" style="border: 2px solid #444; border-radius: 10px;"></iframe><br>
-  <p>Compare your choices with the optimal strategy!</p>
+  <h2 id="simulation">🔗 Try the Simulation (coming soon!)</h2>
+  <iframe src="game/index.html" width="100%" height="600px" style="border: 2px solid #444; border-radius: 10px;"></iframe>
 
   <hr>
 
-  <h2>🛠️ Credits</h2>
+  <h2 id="credits">🛠️ Credits</h2>
   <p>Developed as part of <strong>IIT-GN’s Discrete Mathematics</strong> course for the <a href="https://summerofmath.com/" target="_blank">Summer of Math Exposition (SoME4)</a>.</p>
   <p>
     Project by: Aarushi Ahlawat<br>
