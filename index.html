@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Target Acquired: A Discrete Math Showdown</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Optional: Add your CSS here -->
+</head>
+<body>
+  <h1>🎯 Target Acquired: A Discrete Math Showdown Between Humans and Algorithms</h1>
+  <p>
+    Imagine a high-stakes defense scenario: enemy drones, missiles, and combat aircraft are rapidly approaching. You have a limited arsenal—three powerful weapons—but each is only partially effective against different targets. What’s your move?
+  </p>
+  <p>
+    This blog explores the power of <strong>discrete mathematics</strong> in tactical decision-making. Can human intuition outmatch a mathematical model in neutralizing threats?
+  </p>
+  <hr>
+
+  <h2>🚀 Problem Setup</h2>
+  <p>We consider three types of <strong>weapons</strong> and <strong>aerial targets</strong>:</p>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th></th>
+      <th>UAV (Drone)</th>
+      <th>Missile</th>
+      <th>Combat Aircraft</th>
+    </tr>
+    <tr>
+      <td>Missile</td>
+      <td>0.8</td>
+      <td>0.6</td>
+      <td>0.3</td>
+    </tr>
+    <tr>
+      <td>Laser</td>
+      <td>0.4</td>
+      <td>0.3</td>
+      <td>0.9</td>
+    </tr>
+    <tr>
+      <td>EMP</td>
+      <td>0.9</td>
+      <td>0.2</td>
+      <td>0.2</td>
+    </tr>
+  </table>
+
+  <p><strong>🔒 Constraints:</strong></p>
+  <ul>
+    <li>Each weapon can be used only once</li>
+    <li>Each target can be engaged only once</li>
+    <li>Some weapons are ineffective against certain targets</li>
+  </ul>
+
+  <hr>
+
+  <h2>🎮 Manual Mode: Human Intuition</h2>
+  <p>You play the game by selecting which weapon to assign to each threat.</p>
+  <p><strong>🔍 Example:</strong></p>
+  <ul>
+    <li>EMP → UAV</li>
+    <li>Missile → Missile</li>
+    <li>Laser → Combat Aircraft</li>
+  </ul>
+  <blockquote>
+    📌 <strong>Pigeonhole Principle in Action:</strong><br>
+    When you have more targets than weapons, some threats <em>must</em> get through. Choose wisely!
+  </blockquote>
+
+  <hr>
+
+  <h2>🤖 Mathematical Mode: Optimization Strategy</h2>
+  <p>We define the problem using discrete math:</p>
+  <ul>
+    <li>Let <code>x_ij = 1</code> if weapon <code>i</code> is assigned to target <code>j</code>, otherwise 0</li>
+    <li>Let <code>P_ij</code> be the success probability</li>
+    <li><strong>Maximize</strong> total expected success: ∑∑ <code>P_ij * x_ij</code></li>
+  </ul>
+  <p><strong>🔧 Subject to:</strong></p>
+  <ul>
+    <li>Each weapon assigned to at most one target</li>
+    <li>Each target assigned to at most one weapon</li>
+    <li>Some <code>x_ij</code> are restricted (e.g., EMP → Missile = 0)</li>
+  </ul>
+
+  <blockquote>
+    🕸 <strong>Graph Theory Spotlight:</strong><br>
+    This is a classic bipartite matching problem with weighted edges!
+  </blockquote>
+
+  <hr>
+
+  <h2>🧠 Discrete Math Insights</h2>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Concept</th>
+      <th>Application</th>
+    </tr>
+    <tr>
+      <td>Pigeonhole Principle</td>
+      <td>Limited weapons vs. multiple threats</td>
+    </tr>
+    <tr>
+      <td>Constraint Satisfaction</td>
+      <td>Weapon-target compatibility</td>
+    </tr>
+    <tr>
+      <td>Bipartite Graph Matching</td>
+      <td>Optimal assignment</td>
+    </tr>
+    <tr>
+      <td>Probability Theory</td>
+      <td>Expected outcome computation</td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <h2>🆚 Human vs. Model: The Showdown</h2>
+  <p>We tested both approaches under identical scenarios:</p>
+  <table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+      <th>Metric</th>
+      <th>Human Player</th>
+      <th>Mathematical Model</th>
+    </tr>
+    <tr>
+      <td>Targets Neutralized</td>
+      <td>5/9</td>
+      <td>8/9</td>
+    </tr>
+    <tr>
+      <td>Weapon Efficiency</td>
+      <td>60%</td>
+      <td>90%</td>
+    </tr>
+    <tr>
+      <td>Constraint Violations</td>
+      <td>2</td>
+      <td>0</td>
+    </tr>
+  </table>
+  <blockquote>
+    ✅ The model consistently outperforms manual play, especially as complexity increases.
+  </blockquote>
+
+  <hr>
+
+  <h2>🧩 Reflection</h2>
+  <ul>
+    <li>Discrete math is <em>not just theory</em>—it’s a tactical toolkit.</li>
+    <li>Optimization models can support or correct human instincts.</li>
+    <li>Visualizing constraints leads to better real-world decisions.</li>
+  </ul>
+  <blockquote>
+    “When every second counts, logic wins over luck.”
+  </blockquote>
+
+  <hr>
+
+  <h2>🔗 Try the Simulation (coming soon!)</h2>
+  <p><a href="./game/index.html">🔫 Play the Game</a><br>
+  Compare your choices with the optimal strategy!</p>
+
+  <hr>
+
+  <h2>🛠️ Credits</h2>
+  <p>Developed as part of <strong>IIT-GN’s Discrete Mathematics</strong> course for the <a href="https://summerofmath.com/" target="_blank">Summer of Math Exposition (SoME4)</a>.</p>
+  <p>
+    Project by: Aarushi Ahlawat<br>
+    GitHub Repo: <a href="https://github.com/aarushi-iitm/some4-weapon-target-sim" target="_blank">some4-weapon-target-sim</a>
+  </p>
+</body>
+</html>
