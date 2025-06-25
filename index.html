@@ -101,6 +101,7 @@
   </blockquote>
 
   <hr>
+  
   <div class="card">
     <h3>🧩 Constraint Satisfaction</h3>
     <p class="summary">Weapons must be assigned to targets without breaking rules — cooldowns, incompatibilities, or duplicates.</p>
@@ -115,7 +116,7 @@
         <li><strong>One-to-One Assignments</strong>: A target cannot be hit by more than one weapon simultaneously.</li>
       </ul>
       <p>
-        This setup is similar to Sudoku, map coloring, or course scheduling — all of which fall under CSPs. Solvers check combinations and prune invalid ones until a valid assignment is found.
+        This setup is similar to Sudoku, map coloring, or course scheduling — all of which fall under CSPs.
       </p>
       <blockquote>
         ❗ CSPs are generally NP-complete, but efficient solutions exist for small cases or structured constraints.
@@ -124,6 +125,80 @@
     </div>
   </div>
   
+  <div class="card">
+    <h3>🕸️ Bipartite Graph Matching</h3>
+    <p class="summary">Visualize weapons and targets as two groups of nodes — connections show effectiveness. We seek the best pairing.</p>
+    <button class="expand-button" onclick="toggleCard('graph-details')">⬇ Show More</button>
+    <div id="graph-details" class="card-details" style="display: none;">
+      <p>
+        Our problem can be represented as a <strong>bipartite graph</strong>:
+      </p>
+      <ul>
+        <li>Left set: Weapons</li>
+        <li>Right set: Targets</li>
+        <li>Edges: Probabilistic effectiveness between weapon and target</li>
+      </ul>
+      <p>
+        The goal is to choose a <strong>maximum weight matching</strong> — a set of non-overlapping edges with the highest total value.
+      </p>
+      <p>
+        This model naturally avoids violating "one weapon, one target" rules.
+      </p>
+      <blockquote>
+        🎯 Matching problems are well-studied in graph theory and solvable in polynomial time using algorithms like Hungarian Method.
+      </blockquote>
+      <button class="expand-button" onclick="toggleCard('graph-details')">⬆ Hide</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>🎲 Probability Theory</h3>
+    <p class="summary">Instead of certainty, we deal with success probabilities. We aim to maximize total expected success.</p>
+    <button class="expand-button" onclick="toggleCard('prob-details')">⬇ Show More</button>
+    <div id="prob-details" class="card-details" style="display: none;">
+      <p>
+        Each edge (weapon-target pair) is weighted by a probability value between 0 and 1, indicating likelihood of neutralization.
+      </p>
+      <p>
+        The objective function is:
+        <code>maximize ∑∑ (x_ij × P_ij)</code>
+      </p>
+      <p>
+        The model doesn’t chase perfect hits — it calculates the <em>expected number of threats neutralized</em>.
+      </p>
+      <blockquote>
+        📐 This is a probabilistic version of an assignment problem, ideal when success isn't binary.
+      </blockquote>
+      <button class="expand-button" onclick="toggleCard('prob-details')">⬆ Hide</button>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>📦 Pigeonhole Principle</h3>
+    <p class="summary">More incoming threats than available weapons? Some targets will definitely slip through.</p>
+    <button class="expand-button" onclick="toggleCard('php-details')">⬇ Show More</button>
+    <div id="php-details" class="card-details" style="display: none;">
+      <p>
+        The Pigeonhole Principle is deceptively simple: if you try to assign <strong>more items</strong> than there are containers, at least one container will have more than one item.
+      </p>
+      <p>
+        In our context:
+        <ul>
+          <li>Weapons = Containers</li>
+          <li>Threats = Items</li>
+        </ul>
+        If threats > weapons, some threats will remain unengaged no matter what.
+      </p>
+      <blockquote>
+        🚨 Even with perfect aim, math guarantees that some targets must escape if the count exceeds firepower.
+      </blockquote>
+      <button class="expand-button" onclick="toggleCard('php-details')">⬆ Hide</button>
+    </div>
+  </div>
+  
+  
+  <hr>
+
   <h2 id="model">🤖 Mathematical Mode: Optimization Strategy</h2>
   <p>We define the problem using discrete math:</p>
   <ul>
@@ -230,7 +305,7 @@
       const el = document.getElementById(id);
       el.style.display = (el.style.display === 'none') ? 'block' : 'none';
     }
-  </script>
+  </script>  
   
 </body>
 </html>
