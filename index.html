@@ -101,7 +101,29 @@
   </blockquote>
 
   <hr>
-
+  <div class="card">
+    <h3>🧩 Constraint Satisfaction</h3>
+    <p class="summary">Weapons must be assigned to targets without breaking rules — cooldowns, incompatibilities, or duplicates.</p>
+    <button class="expand-button" onclick="toggleCard('csp-details')">⬇ Show More</button>
+    <div id="csp-details" class="card-details" style="display: none;">
+      <p>
+        This scenario is modeled like a logic puzzle: we’re given a set of variables (weapons), domains (possible targets), and constraints:
+      </p>
+      <ul>
+        <li><strong>Cooldown</strong>: A weapon may not be reused in the next turn if it's on cooldown.</li>
+        <li><strong>Compatibility</strong>: Some weapons cannot target specific threats (e.g., EMP vs. missile).</li>
+        <li><strong>One-to-One Assignments</strong>: A target cannot be hit by more than one weapon simultaneously.</li>
+      </ul>
+      <p>
+        This setup is similar to Sudoku, map coloring, or course scheduling — all of which fall under CSPs. Solvers check combinations and prune invalid ones until a valid assignment is found.
+      </p>
+      <blockquote>
+        ❗ CSPs are generally NP-complete, but efficient solutions exist for small cases or structured constraints.
+      </blockquote>
+      <button class="expand-button" onclick="toggleCard('csp-details')">⬆ Hide</button>
+    </div>
+  </div>
+  
   <h2 id="model">🤖 Mathematical Mode: Optimization Strategy</h2>
   <p>We define the problem using discrete math:</p>
   <ul>
@@ -202,5 +224,13 @@
     Project by: Aarushi Ahlawat<br>
     GitHub Repo: <a href="https://github.com/aarushi-iitm/some4-weapon-target-sim" target="_blank">some4-weapon-target-sim</a>
   </p>
+
+  <script>
+    function toggleCard(id) {
+      const el = document.getElementById(id);
+      el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+    }
+  </script>
+  
 </body>
 </html>
